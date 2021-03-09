@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {Fragment} from 'react';
 import {
   Text,
   View,
@@ -10,33 +10,39 @@ import {
 } from 'react-native';
 import {LOGO} from '../utils';
 import useRoverList from '../hooks/useRover';
-import {RoverList, WaitingForRovers} from '../components';
+import {RoverCard, WaitingForRovers} from '../components';
 
 const {height} = Dimensions.get('window');
 
 function HomeScreen({navigation}) {
-  const {rovers = [], isLoading} = useRoverList();
+  const {rovers, isError, isLoading} = useRoverList();
 
   return (
-    <ScrollView contentContainerStyle={styles.growOne}>
+    <ScrollView contentContainerStyle={styles.container}>
       <ImageBackground
         style={styles.backgroundHeader}
         source={require('../assets/backdrop.png')}>
-        {!isLoading ? (
-          <>
+        {isLoading && (
+          <Fragment>
             <Image style={styles.logo} source={LOGO} />
             <Text style={styles.header}>Rover to explore</Text>
-          </>
-        ) : null}
+          </Fragment>
+        )}
       </ImageBackground>
       {isLoading ? (
         <WaitingForRovers />
-      ) : (
-        <View style={styles.container}>
-          <View style={styles.container}>
-            <RoverList data={rovers} />
-          </View>
+      ) : !isError ? (
+        <View style={styles.cardContainer}>
+          {data.map(rover => (
+            <RoverCard
+              {...rover}
+              key={rover.id}
+              onPress={() => navigation.navigate('Explore', {rover})}
+            />
+          ))}
         </View>
+      ) : (
+        <Text>Ha ocurrido un error</Text>
       )}
     </ScrollView>
   );
@@ -55,12 +61,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'flex-end',
   },
-  container: {
+  cardContainer: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  growOne: {
+  container: {
     flexGrow: 1,
     backgroundColor: '#111',
   },

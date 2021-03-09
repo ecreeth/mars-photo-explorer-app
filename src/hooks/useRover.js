@@ -1,11 +1,12 @@
 import useSWR from 'swr';
 
 function useRoverList() {
-  const {data} = useSWR('/rovers');
+  const {data, error} = useSWR('/rovers');
 
   return {
     rovers: data?.rovers,
-    isLoading: !data,
+    isLoading: !error && !data,
+    isError: error,
   };
 }
 
