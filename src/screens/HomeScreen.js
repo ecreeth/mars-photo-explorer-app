@@ -7,33 +7,34 @@ import {
   StyleSheet,
   Dimensions,
   ImageBackground,
+  Pressable,
 } from 'react-native';
 import {LOGO} from '../utils';
 import useRoverList from '../hooks/useRover';
-import {RoverCard, WaitingForRovers} from '../components';
+import {RoverCard, WaitingForRovers, SomethingWentWrong} from '../components';
 
 const {height} = Dimensions.get('window');
 
 function HomeScreen({navigation}) {
-  const {rovers, isError, isLoading} = useRoverList();
+  const {rovers, isError, mutate, isLoading, isValidating} = useRoverList();
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <ImageBackground
         style={styles.backgroundHeader}
         source={require('../assets/backdrop.png')}>
-        {isLoading && (
+        {!isLoading && !isError ? (
           <Fragment>
             <Image style={styles.logo} source={LOGO} />
             <Text style={styles.header}>Rover to explore</Text>
           </Fragment>
-        )}
+        ) : null}
       </ImageBackground>
-      {isLoading ? (
+      {isLoading || isValidating ? (
         <WaitingForRovers />
       ) : !isError ? (
         <View style={styles.cardContainer}>
-          {data.map(rover => (
+          {rovers.map(rover => (
             <RoverCard
               {...rover}
               key={rover.id}
@@ -42,7 +43,7 @@ function HomeScreen({navigation}) {
           ))}
         </View>
       ) : (
-        <Text>Ha ocurrido un error</Text>
+        <SomethingWentWrong />
       )}
     </ScrollView>
   );
