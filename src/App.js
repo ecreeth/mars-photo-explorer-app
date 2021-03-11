@@ -14,7 +14,12 @@ const Stack = createStackNavigator();
 
 function App() {
   return (
-    <SWRConfig value={{fetcher, loadingTimeout: 7}}>
+    <SWRConfig
+      value={{
+        fetcher,
+        loadingTimeout: 7,
+        errorRetryCount: 2,
+      }}>
       <StatusBar backgroundColor="#111" />
       <NavigationContainer>
         <Stack.Navigator>

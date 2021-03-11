@@ -1,8 +1,10 @@
 import React from 'react';
 import {mutate} from 'swr';
+import {useNetInfo} from '@react-native-community/netinfo';
 import {Pressable, StyleSheet, Text, View} from 'react-native';
 
-function SomethingWentWrong() {
+function SomethingWentWrong({retry}) {
+  const netInfo = useNetInfo();
   return (
     <View style={styles.container}>
       <Text style={styles.emoji}>😞</Text>
@@ -10,12 +12,14 @@ function SomethingWentWrong() {
       <Text style={{color: 'white'}}>
         Please, check your internet connection
       </Text>
-      <Pressable
-        style={styles.btnContainer}
-        android_ripple={{color: '#555'}}
-        onPress={() => mutate('/rovers')}>
-        <Text style={{color: 'lightgreen'}}>Try Again</Text>
-      </Pressable>
+      {netInfo.isConnected && (
+        <Pressable
+          style={styles.btnContainer}
+          android_ripple={{color: '#555'}}
+          onPress={() => mutate(retry, false)}>
+          <Text style={{color: 'lightgreen'}}>Try Again</Text>
+        </Pressable>
+      )}
     </View>
   );
 }

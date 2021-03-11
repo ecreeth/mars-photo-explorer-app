@@ -16,8 +16,8 @@ import {RoverCard, WaitingForRovers, SomethingWentWrong} from '../components';
 const {height} = Dimensions.get('window');
 
 function HomeScreen({navigation}) {
-  const {rovers, isError, mutate, isLoading, isValidating} = useRoverList();
-
+  const {rovers, isError, mutate, isLoading} = useRoverList();
+  
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <ImageBackground
@@ -30,7 +30,7 @@ function HomeScreen({navigation}) {
           </Fragment>
         ) : null}
       </ImageBackground>
-      {isLoading || isValidating ? (
+      {isLoading ? (
         <WaitingForRovers />
       ) : !isError ? (
         <View style={styles.cardContainer}>
@@ -43,7 +43,7 @@ function HomeScreen({navigation}) {
           ))}
         </View>
       ) : (
-        <SomethingWentWrong />
+        <SomethingWentWrong retry="/rovers" />
       )}
     </ScrollView>
   );
