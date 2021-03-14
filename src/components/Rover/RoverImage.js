@@ -17,10 +17,10 @@ const RoverImage = ({name}) => (
 
 const styles = StyleSheet.create({
   roverImage: {
-    width: 115,
-    height: 140,
-    marginRight: 10,
-    borderRadius: 4,
+    width: 125,
+    height: '100%',
+    borderTopLeftRadius: 5,
+    borderBottomLeftRadius: 5,
     backgroundColor: '#eee',
   },
 });

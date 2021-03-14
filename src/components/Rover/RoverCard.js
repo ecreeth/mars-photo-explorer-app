@@ -64,6 +64,7 @@ function RoverCard(props) {
 const styles = StyleSheet.create({
   cardContainer: {
     flex: 1,
+    padding: 10,
   },
   rowContainer: {
     flex: 1,
@@ -72,8 +73,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   roverCard: {
-    padding: 15,
-    borderRadius: 4,
+    borderRadius: 5,
     marginBottom: 15,
     width: width * 0.93,
     flexDirection: 'row',
