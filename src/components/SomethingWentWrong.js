@@ -1,24 +1,28 @@
-import React from 'react';
+import React, {Fragment} from 'react';
 import {mutate} from 'swr';
 import {useNetInfo} from '@react-native-community/netinfo';
 import {Pressable, StyleSheet, Text, View} from 'react-native';
 
-function SomethingWentWrong({retry}) {
+function SomethingWentWrong({children, retry}) {
   const netInfo = useNetInfo();
   return (
     <View style={styles.container}>
       <Text style={styles.emoji}>😞</Text>
       <Text style={styles.title}>¡Oops, something went wrong!</Text>
-      <Text style={{color: 'white'}}>
-        Please, check your internet connection
-      </Text>
-      {netInfo.isConnected && (
-        <Pressable
-          style={styles.btnContainer}
-          android_ripple={{color: '#555'}}
-          onPress={() => mutate(retry, false)}>
-          <Text style={{color: 'lightgreen'}}>Try Again</Text>
-        </Pressable>
+      {netInfo.isConnected ? (
+        <Fragment>
+          {children}
+          <Pressable
+            style={styles.btnContainer}
+            android_ripple={{color: '#555'}}
+            onPress={() => mutate(retry)}>
+            <Text style={{color: 'lightgreen'}}>Try Again</Text>
+          </Pressable>
+        </Fragment>
+      ) : (
+        <Text style={{color: 'white'}}>
+          Please, check your internet connection
+        </Text>
       )}
     </View>
   );

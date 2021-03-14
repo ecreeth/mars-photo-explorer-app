@@ -1,16 +1,15 @@
 import React, {memo, useEffect, useLayoutEffect, useState} from 'react';
 import {
   Text,
-  StyleSheet,
-  Image,
-  Pressable,
-  FlatList,
-  Dimensions,
   View,
+  FlatList,
+  Pressable,
+  Dimensions,
+  StyleSheet,
   ActivityIndicator,
 } from 'react-native';
-import {Picker} from '@react-native-picker/picker';
 import ImageView from 'react-native-image-viewing';
+import FastImage from 'react-native-fast-image';
 import fetcher from '../utils/fetcher';
 
 const {height} = Dimensions.get('window');
@@ -20,26 +19,24 @@ function ExploreScreen({navigation, route}) {
   const [sol, setSol] = useState(0);
   const [page, setPage] = useState(1);
   const [photos, setPhotos] = useState([]);
-  const [isLoading, setLoading] = useState(false);
   const [currentImage, setCurrentImage] = useState(0);
-  const [hasMoreData, setHasMoreData] = useState(true);
-  const [selectedCamera, setSelectedCamera] = useState('');
+  const [isLoadingPhotos, setLoadingPhotos] = useState(false);
   const [isModalVisible, setModalVisibility] = useState(false);
 
   useEffect(() => {
-    if (!hasMoreData || sol > rover.max_sol) {
+    if (sol > rover.max_sol) {
       return;
     }
-    setLoading(true);
+    setLoadingPhotos(true);
     fetcher(`/rovers/${rover.name}/photos?sol=${sol}&page=${page}`)
       .then(res => {
-        //
-        if (!res?.photos.length) {
+        // Check if there not photos in the current sol
+        if (!res.photos.length && sol < rover.max_sol) {
           setSol(sol + 1);
-          setHasMoreData(false);
           return;
         }
-        //
+
+        // Let's format the incoming data
         const filteredData = res.photos.map(photo => ({
           ...photo,
           uri: photo.img_src,
@@ -49,10 +46,15 @@ function ExploreScreen({navigation, route}) {
           page === 1 ? filteredData : [...prev, ...filteredData],
         );
       })
-      .catch(e => console.error(e))
-      .finally(() => setLoading(false));
-  }, [hasMoreData, page, rover.max_sol, rover.name, sol]);
+      .catch(e => {
+        console.error(e);
+      })
+      .finally(() => {
+        setLoadingPhotos(false);
+      });
+  }, [page, rover.max_sol, rover.name, sol]);
 
+  // Change the header title
   useLayoutEffect(() => {
     navigation.setOptions({
       title: `Explore ${rover.name}`,
@@ -60,60 +62,69 @@ function ExploreScreen({navigation, route}) {
   }, [navigation, rover.name]);
 
   const onEndReached = () => {
-    if (isLoading) {
+    if (isLoadingPhotos) {
       return;
     }
     setPage(page + 1);
   };
 
+  // A very simple skeleton
+  const Skeleton = () => (
+    <View style={styles.mb12}>
+      <View style={[styles.image, {justifyContent: 'center'}]}>
+        <ActivityIndicator color="#333" />
+      </View>
+      <View style={styles.skeletonContainer}>
+        <View style={styles.skeletonLeft} />
+        <View style={styles.skeletonRigth} />
+      </View>
+    </View>
+  );
+
+  if (isLoadingPhotos && !photos.length) {
+    return (
+      <View style={styles.container}>
+        <Skeleton />
+        <Skeleton />
+        <Skeleton />
+      </View>
+    );
+  }
+
   const ListItem = memo(({item, index}) => {
     return (
-      <View style={styles.imageContainer}>
-        <Pressable
-          key={item.id}
-          onPress={() => {
-            setCurrentImage(index);
-            setModalVisibility(true);
-          }}>
-          <Image
-            style={styles.image}
-            source={{uri: item.uri}}
-            progressiveRenderingEnabled
-          />
-          <View style={styles.imageContent}>
-            <Text>🌞 {item.sol}</Text>
-            <Text>📸 {item.earth_date}</Text>
+      <Pressable
+        key={item.id}
+        onPress={() => {
+          setCurrentImage(index);
+          setModalVisibility(true);
+        }}>
+        <FastImage style={styles.image} source={{uri: item.uri}} />
+        <View style={styles.imageContent}>
+          <View style={{flexDirection: 'row'}}>
+            <Text style={{marginRight: 10}}>🌞 {item.sol}</Text>
+            <Text>📷 {item.camera.name}</Text>
           </View>
-        </Pressable>
-      </View>
+          <Text>📅 {item.earth_date}</Text>
+        </View>
+      </Pressable>
     );
   });
 
   return (
     <View style={styles.container}>
-      <Picker
-        selectedValue={selectedCamera}
-        onValueChange={item => setSelectedCamera(item)}>
-        <Picker.Item value="any" label="All Rover Cameras" />
-        {rover.cameras.map(camera => (
-          <Picker.Item
-            key={camera.id}
-            value={camera.name}
-            label={camera.full_name}
-          />
-        ))}
-      </Picker>
-
       <FlatList
         data={photos}
+        removeClippedSubviews
         initialNumToRender={26}
         maxToRenderPerBatch={40}
         onEndReached={onEndReached}
+        updateCellsBatchingPeriod={60}
         showsVerticalScrollIndicator={false}
         keyExtractor={item => item.id.toString()}
         renderItem={props => <ListItem {...props} />}
         ListFooterComponent={() =>
-          isLoading ? (
+          isLoadingPhotos ? (
             <ActivityIndicator style={styles.footer} color="#333" />
           ) : null
         }
@@ -124,6 +135,7 @@ function ExploreScreen({navigation, route}) {
         animationType="slide"
         visible={isModalVisible}
         imageIndex={currentImage}
+        swipeToCloseEnabled={false}
         onRequestClose={() => setModalVisibility(false)}
       />
     </View>
@@ -133,17 +145,15 @@ function ExploreScreen({navigation, route}) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingHorizontal: 7,
+    paddingTop: 10,
+    paddingHorizontal: 10,
     backgroundColor: '#f8edeb',
   },
   footer: {
     marginVertical: 10,
   },
-  backdrop: {
-    width: '100%',
-    height: '100%',
-    justifyContent: 'center',
-    alignItems: 'center',
+  mb12: {
+    marginBottom: 12,
   },
   image: {
     width: '100%',
@@ -153,15 +163,25 @@ const styles = StyleSheet.create({
   },
   imageContent: {
     paddingTop: 4,
-    marginBottom: 7,
+    marginBottom: 12,
     alignItems: 'center',
     flexDirection: 'row',
     justifyContent: 'space-between',
   },
-  imageContainer: {
-    flex: 1,
-    margin: 1,
-    flexDirection: 'column',
+  skeletonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 7,
+  },
+  skeletonLeft: {
+    width: 50,
+    height: 15,
+    backgroundColor: '#ccc',
+  },
+  skeletonRigth: {
+    width: 100,
+    height: 15,
+    backgroundColor: '#ccc',
   },
 });
 

@@ -4,9 +4,9 @@ import {enableScreens} from 'react-native-screens';
 import {NavigationContainer} from '@react-navigation/native';
 import {createStackNavigator} from '@react-navigation/stack';
 
+import * as screens from './screens';
 import fetcher from './utils/fetcher';
 import {StatusBar} from 'react-native';
-import * as screens from './screens';
 
 enableScreens();
 

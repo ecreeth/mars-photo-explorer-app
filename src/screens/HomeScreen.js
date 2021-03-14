@@ -7,7 +7,6 @@ import {
   StyleSheet,
   Dimensions,
   ImageBackground,
-  Pressable,
 } from 'react-native';
 import {LOGO} from '../utils';
 import useRoverList from '../hooks/useRover';
@@ -16,8 +15,8 @@ import {RoverCard, WaitingForRovers, SomethingWentWrong} from '../components';
 const {height} = Dimensions.get('window');
 
 function HomeScreen({navigation}) {
-  const {rovers, isError, mutate, isLoading} = useRoverList();
-  
+  const {rovers, isError, isLoading} = useRoverList();
+
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <ImageBackground
@@ -43,7 +42,9 @@ function HomeScreen({navigation}) {
           ))}
         </View>
       ) : (
-        <SomethingWentWrong retry="/rovers" />
+        <SomethingWentWrong retry="/rovers">
+          <Text style={{color: 'white'}}>{isError.data?.error?.message}</Text>
+        </SomethingWentWrong>
       )}
     </ScrollView>
   );

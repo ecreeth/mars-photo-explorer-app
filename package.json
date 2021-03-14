@@ -12,18 +12,18 @@
   "dependencies": {
     "@react-native-community/masked-view": "^0.1.10",
     "@react-native-community/netinfo": "^6.0.0",
-    "@react-native-picker/picker": "^1.9.11",
     "@react-navigation/native": "^5.9.3",
     "@react-navigation/stack": "^5.14.3",
     "react": "17.0.1",
-    "react-native": "0.64.0-rc.4",
+    "react-native": "0.64.0",
+    "react-native-fast-image": "^8.3.4",
     "react-native-gesture-handler": "^1.10.3",
     "react-native-image-viewing": "^0.2.0",
     "react-native-reanimated": "^2.0.0",
-    "react-native-safe-area-context": "^3.1.9",
+    "react-native-safe-area-context": "^3.2.0",
     "react-native-screens": "^2.18.1",
     "redaxios": "^0.4.1",
-    "swr": "^0.4.2"
+    "swr": "^0.5.3"
   },
   "devDependencies": {
     "@babel/core": "^7.12.9",
